@@ -101,7 +101,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-# .env
+.env
 .venv
 env/
 venv/
@@ -131,4 +131,4 @@ venv.bak/
 !/workspace/output
 /workspace/output/*
 !/workspace/output/.keep
-# conversation_histories/*
+conversation_histories/*

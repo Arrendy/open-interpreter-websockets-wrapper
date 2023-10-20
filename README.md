@@ -1,42 +1,41 @@
-# 美少女OPInterpreter サーバーサイド 公開用
-[English version](./en_README.md)
+# Open Interpreter Websockets Wrapper
 
-## 注意
+## Note
 
-- (2023/10/16) Open Interpreterの最新のバージョン（0.1.9）で、WebSocketがchunk毎に送信できないエラーが発生したので、一旦0.1.7で固定しています。
-- (2023/10/16) リポジトリ名のスペルが誤っていたので修正しました。"nike-open-intepreter" => "nike-open-interpreter"
+- (16/10/2023) I'm currently pinned to version 0.1.7 of Open Interpreter due to an error in the latest version (0.1.9) that prevents WebSocket from sending in chunks.
+- (16/10/2023) I changed repository name from "nike-open-intepreter" to "nike-open-interpreter" because of misspelling.
 
-## できること
+## Features
 
-1. WebSocketでメッセージを受け取って、Open Interpreterからレスポンスを取得することができます（streamモード対応）。
-2. ファイルを送信してサーバー側に保存することができます。このファイルに対してOpen Interpreterに指示を出すことも可能です。
+1. You can receive messages via WebSocket and obtain responses from the Open Interpreter (supports stream mode).
+2. You can send files to be saved on the server side. You can also issue commands to the Open Interpreter for these files.
 
-## 事前準備
+## Prerequisites
 
-1. 本リポジトリはWebSocketでの起動を前提としているため、ご自身の環境に合わせて接続先を準備してください。
-2. 接続URLはデフォルトで`ws://127.0.0.1:8000/ws`です。
+1. This repository assumes operation via WebSocket, so please prepare a connection destination suitable for your environment.
+2. The default connection URL is `ws://127.0.0.1:8000/ws`.
 
-## 実行方法
+## Execution Steps
 
-1. `.env`にOPENAI_API_KEYを設定
-2. `docker-compose up -d --build` 実行
+1. Set the OPENAI_API_KEY in `.env`.
+2. Execute `docker-compose up -d --build`.
 
-## デバッグ
+## Debugging
 
-1. 実行環境がVSCodeのときに、DEBUG_MODE=1でデバッグモードを起動します。
-2. ブレークポイントを設置して快適にデバッグしましょう。
+1. When using VSCode as the execution environment, launch in debug mode with DEBUG_MODE=1.
+2. Set breakpoints and enjoy comfortable debugging.
 
-参考: [VS Codeエディタ入門](https://zenn.dev/karaage0703/books/80b6999d429abc8051bb/viewer/898591)
+Reference: [VS Code Editor Introduction](https://zenn.dev/karaage0703/books/80b6999d429abc8051bb/viewer/898591)
 
-## コード解説
+## Code Explanation
 
-長くなるので下記に記載しました。
+It's lengthy, so I've detailed it in the link below:
 
-- [【コード解説】美少女OPInterpreter簡易版](https://note.com/nike_cha_n/n/n39f62ee846e3)
+- https://note.com/nike_cha_n/n/n39f62ee846e3
 
-## その他
+## Miscellaneous
 
-1. ライセンスは[KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter)に準拠します。
-2. Open Interpreterの使用方法は下記にまとめています。
+1. The license conforms to [KillianLucas/open-interpreter](https://github.com/KillianLucas/open-interpreter).
+2. Instructions on using the Open Interpreter are consolidated in the link below:
 
-- [【開発者向け】Open Interpreterの使い方をコード付きで説明する（python編）](https://note.com/nike_cha_n/n/n764514cf5351)
+- https://note.com/nike_cha_n/n/n764514cf5351

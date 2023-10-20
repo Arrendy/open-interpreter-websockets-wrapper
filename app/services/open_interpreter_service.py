@@ -6,27 +6,28 @@ import interpreter
 from datetime import datetime
 from .websocket_service import send_websocket_message
 
+
 async def stream_open_interpreter(websocket):
-    language = os.getenv('LANGUAGE') or "japanese"
+    language = "english"
 
     try:
-        # 1日の記憶を保持する
+        # retain memory of the day
         interpreter.conversation_filename = f"{datetime.now().strftime('%Y%m%d')}.json"
         interpreter.conversation_history_path = "./conversation_histories/"
         if os.path.exists(interpreter.conversation_history_path + interpreter.conversation_filename):
-            # あったら読み込んで記憶として設定する
+            # If there is, load it and set it as a memory.
             with open(interpreter.conversation_history_path + interpreter.conversation_filename, "r") as f:
                 interpreter.messages = json.load(f)
             print("Loaded conversation history.")
         else:
-            # なかったら作成する
+            # Create it if it doesn't exist
             with open(interpreter.conversation_history_path + interpreter.conversation_filename, "w") as f:
                 json.dump([], f)
             print("Created conversation history.")
 
         interpreter.auto_run = True
         # interpreter.debug_mode = True
-        interpreter.system_message = f"""
+        interpreter.system_message += f"""
 You can use the following libraries without installing:
 - pandas
 - numpy
@@ -49,7 +50,6 @@ You can use the following libraries without installing:
 - pdfkit
 - weasyprint
 Your workspace is `./workspace` folder. If you make an output file, please put it in `./workspace/output`.
-{'[[Please answer in Japanese. 日本語でお答えください。]]' if language == 'japanese' else ''}
         """
 
         message = ""
@@ -63,7 +63,7 @@ Your workspace is `./workspace` folder. If you make an output file, please put i
             message = ""
             prev_type = ""
 
-            # WebSocketでメッセージ受け取り待機
+            # Waiting to receive messages via WebSocket
             print("Waiting for user message...")
             user_message = await websocket.receive_text()
             print(f"Received user message: {user_message}")
@@ -72,20 +72,21 @@ Your workspace is `./workspace` folder. If you make an output file, please put i
             message_content = parsed_data.get("content")
             message_type = parsed_data.get("type")
 
-            # WebSocketでテキストメッセージを受け取った場合
-            # ex. {"type": "message", "text": "こんにちは"}
+            # If you receive a text message on WebSocket
+            # ex. {"type": "chat", "content": "Hello"}
             if message_type == "chat" and message_content != "":
                 if saved_file != "":
                     user_message = saved_file + user_message
                     saved_file = ""
 
-                # OpenInterpreterの結果をstreamモードで取得、chunk毎に処理
+                # Obtain OpenInterpreter results in stream mode and process each chunk
                 is_source_code = False
                 for chunk in interpreter.chat(message_content, display=True, stream=True):
                     current_type = list(chunk.keys())[0]
-                    exculde_types = ["language", "active_line", "end_of_execution", "start_of_message", "end_of_message", "start_of_code", "end_of_code"]
-                    if current_type not in exculde_types:
-                        # message typeの場合は、文節に区切ってメッセージを送信
+                    exclude_types = ["language", "active_line", "end_of_execution",
+                                     "start_of_message", "end_of_message", "start_of_code", "end_of_code"]
+                    if current_type not in exclude_types:
+                        # For message type, send the message by dividing it into clauses.
                         if current_type != prev_type or (len(message) > 15 and message[-1] in ['、', '。', '！', '？', '；', '…', '：'] or message[-1] == "\n"):
                             if message != "":
                                 if "```" in message:
@@ -102,36 +103,36 @@ Your workspace is `./workspace` folder. If you make an output file, please put i
                             message += chunk[current_type]
                         prev_type = current_type
 
-            # WebSocketでファイルを受け取った場合
+            # If you receive a file via WebSocket
             # ex. {"type": "file", "fileName": "sample.txt", "fileData": "data:;base64,SGVsbG8sIHdvcmxkIQ=="}
             elif message_type == "file":
-                # JSONデータをパースして、ファイル名とファイルデータを取得
+                # Parse JSON data to get file name and file data
                 file_name = parsed_data.get("fileName")
                 base64_data = parsed_data.get("fileData").split(",")[1]
                 file_data = base64.b64decode(base64_data)
 
-                # ファイルを保存するディレクトリを指定
+                # Specify the directory to save the file
                 directory = "./workspace"
 
-                # ディレクトリが存在しない場合、作成
+                # Create the directory if it does not exist
                 if not os.path.exists(directory):
                     os.makedirs(directory)
 
-                # ファイルのフルパスを作成
+                # Create full path to file
                 file_path = os.path.join(directory, file_name)
 
-                # ファイルを保存
+                # save file
                 with open(file_path, "wb") as f:
                     f.write(file_data)
 
-                # メッセージを追加
-                saved_file = f"{directory}/{file_name}にファイルを保存しました。" if language == 'japanese' else f"Saved file to {directory}/{file_name}."
-                save_message = "ファイルを保存しました。" if language == 'japanese' else f"Saved file."
+                # add message
+                saved_file = f"Saved file to {directory}/{file_name}."
+                save_message = "Saved file."
                 await send_websocket_message(websocket, save_message, "assistant")
 
-            # WebSocketで未設定のメッセージを受け取った場合
+            # If you receive an unconfigured message on WebSocket
             else:
-                error_message = "不正な送信が送られたようです。" if language == 'japanese' else "An invalid message was sent."
+                error_message = "An invalid message was sent."
                 await send_websocket_message(websocket, error_message, "assistant")
 
     except Exception as e:
