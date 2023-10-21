@@ -8,8 +8,6 @@ from .websocket_service import send_websocket_message
 
 
 async def stream_open_interpreter(websocket):
-    language = "english"
-
     try:
         # retain memory of the day
         interpreter.conversation_filename = f"{datetime.now().strftime('%Y%m%d')}.json"
@@ -28,6 +26,12 @@ async def stream_open_interpreter(websocket):
         interpreter.auto_run = True
         # interpreter.debug_mode = True
         interpreter.system_message += f"""
+        You are located in a Docker container. You have the ability to interact with the container and improve it. 
+        You have permission to use my general location based on ip address.
+        You have permission to install new packages in the current environment. 
+        If a library will be able to solve a problem, you should install it.
+        You might be asked to send a Dockerfile with any changes to your environment so be sure to remember them.
+        Remember, you can do anything with code. Write a Python script whenever you think you are not capable of something.
 You can use the following libraries without installing:
 - pandas
 - numpy

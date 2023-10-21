@@ -17,7 +17,7 @@
 
 ## Execution Steps
 
-1. Set the OPENAI_API_KEY in `.env`.
+1. Set the OPENAI_API_KEY environment variable to your API Key
 2. Execute `docker-compose up -d --build`.
 
 ## Debugging
